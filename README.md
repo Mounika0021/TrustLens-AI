@@ -1,4 +1,4 @@
-# HyperVerify AI
+# TrustLens-AI
 
 An end-to-end AI-powered identity verification system that combines OCR, Computer Vision, and Vision-Language Models (VLMs) to verify identity documents such as Aadhaar, PAN, and Passports.
 
