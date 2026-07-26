@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Uploaded files
+uploads/
+temp/
+outputs/
+
+# Logs
+*.log
+
+# Model checkpoints
+models/
+*.bin
+*.safetensors
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+# Ignore ML data
+datasets/
+training/
+notebooks/
+
+# Ignore generated/output folders
+outputs/
+uploads/
+temp/
+
+# Ignore model checkpoints
+models/
+
+# Logs
+*.log
+
+# Python cache
+__pycache__/
+*.py[cod]
