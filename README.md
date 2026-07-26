@@ -1,212 +1,225 @@
-# TrustLens-AI
+# TrustLens AI
 
-An end-to-end AI-powered identity verification system that combines OCR, Computer Vision, and Vision-Language Models (VLMs) to verify identity documents such as Aadhaar, PAN, and Passports.
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
+![PyTorch](https://img.shields.io/badge/PyTorch-DeepLearning-red)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
-The system extracts document information, validates identity fields, detects suspicious patterns, explains verification decisions using a Vision-Language Model, and exposes production-ready REST APIs using FastAPI.
+An AI-powered Identity Document Verification System that combines **OCR**, **MRZ extraction**, **Computer Vision**, and **Vision-Language Models (Qwen2-VL + LoRA)** to automatically verify identity documents and generate explainable verification results.
 
----
-
-## Features
-
-- OCR-based text extraction
-- Automatic document type detection
-- Field extraction (Name, DOB, ID Number, Gender, Address)
-- Identity consistency validation
-- Vision-Language reasoning using Qwen2-VL
-- Fraud risk scoring
-- Explainable AI responses
-- LoRA fine-tuning using PEFT
-- FastAPI REST APIs
-- Dockerized deployment
-- Gradio web interface
+TrustLens AI extracts information from identity documents, validates extracted fields, performs AI-based reasoning, computes a trust score, and exposes production-ready REST APIs using **FastAPI**.
 
 ---
 
-## System Architecture
+# Table of Contents
 
+- Overview
+- Features
+- System Architecture
+- Technology Stack
+- Project Structure
+- API Endpoints
+- Sample API Response
+- Installation
+- Running the Application
+- Docker Deployment
+- Model Pipeline
+- Future Improvements
+- Author
+
+---
+
+# Overview
+
+Identity verification is an essential component of modern digital applications including:
+
+- Banking
+- Financial Services
+- Digital KYC
+- Online Account Opening
+- Government Portals
+- Travel Verification
+
+TrustLens AI automates the verification process using Artificial Intelligence by combining OCR, document validation, and Vision-Language reasoning.
+
+The system is designed to be modular, scalable, and deployment-ready.
+
+---
+
+# Features
+
+✅ OCR-based text extraction using EasyOCR
+
+✅ Passport MRZ extraction
+
+✅ Identity field extraction
+
+- Name
+- Date of Birth
+- Gender
+- ID Number
+- Nationality
+- Expiry Date (Passport)
+
+✅ Identity validation rules
+
+✅ AI reasoning using Qwen2-VL
+
+✅ LoRA fine-tuned Vision-Language Model
+
+✅ Explainable AI responses
+
+✅ Trust Score generation
+
+✅ Fraud risk assessment
+
+✅ FastAPI REST APIs
+
+✅ Docker support
+
+---
+
+# System Architecture
+
+```text
+                 User Upload
+                      │
+                      ▼
+          Image Preprocessing
+             (OpenCV + PIL)
+                      │
+                      ▼
+                OCR (EasyOCR)
+                      │
+                      ▼
+            MRZ Extraction (Passport)
+                      │
+                      ▼
+             Field Extraction Engine
+                      │
+                      ▼
+           Identity Validation Rules
+                      │
+                      ▼
+        Vision-Language Model (Qwen2-VL)
+                      │
+                      ▼
+          LoRA Fine-Tuned Reasoning
+                      │
+                      ▼
+            Trust Score Computation
+                      │
+                      ▼
+          FastAPI REST API Response
 ```
-               User Upload
-                    │
-                    ▼
-          Document Preprocessing
-          (OpenCV + Image Enhancement)
-                    │
-                    ▼
-             OCR (EasyOCR)
-                    │
-                    ▼
-          Field Extraction Engine
-                    │
-                    ▼
-      Identity Validation Rules
-                    │
-                    ▼
-        Vision-Language Model
-             (Qwen2-VL)
-                    │
-                    ▼
-       LoRA Fine-tuned Model
-                    │
-                    ▼
-       Fraud Risk Assessment
-                    │
-                    ▼
-     FastAPI REST API Response
-                    │
-                    ▼
-         Gradio Web Interface
-```
 
 ---
 
-## Tech Stack
+# Technology Stack
 
 | Component | Technology |
 |------------|------------|
-| Language | Python |
+| Programming Language | Python |
+| Backend Framework | FastAPI |
 | Deep Learning | PyTorch |
 | OCR | EasyOCR |
-| Vision | OpenCV |
-| Transformers | Hugging Face |
+| Image Processing | OpenCV, Pillow |
 | Vision Language Model | Qwen2-VL |
 | Fine-tuning | PEFT (LoRA) |
-| Backend | FastAPI |
-| Frontend | Gradio |
+| Transformers | Hugging Face |
+| API Documentation | Swagger UI |
 | Deployment | Docker |
 
 ---
 
-## Project Structure
+# Project Structure
 
-```
-HyperVerify-AI/
+```text
+TrustLens-AI/
 
-├── app/
-│   ├── api.py
+├── api/
+│   ├── __init__.py
+│   ├── app.py
+│   ├── inference.py
+│   ├── mrz.py
 │   ├── ocr.py
-│   ├── validator.py
-│   ├── vlm.py
-│   ├── explain.py
-│   └── utils.py
-│
-├── models/
-│
-├── data/
-│
-├── notebooks/
-│
-├── screenshots/
+│   ├── reasoning.py
+│   ├── schemas.py
+│   ├── trust_score.py
+│   ├── utils.py
+│   └── validation.py
 │
 ├── Dockerfile
+├── docker-compose.yml
 ├── requirements.txt
 ├── README.md
-└── app.py
+└── .gitignore
 ```
 
 ---
 
-## API Endpoints
+# API Endpoints
 
-### Verify Document
+## Verify Identity Document
 
 ```
 POST /verify
 ```
 
-Uploads an identity document and returns verification status.
+Uploads an identity document and returns the verification result.
 
-Example Response
+---
+
+## Sample Response
 
 ```json
 {
-  "document":"Aadhaar",
-  "status":"Verified",
-  "risk_score":0.08,
-  "fields":{
-      "name":"John Doe",
-      "dob":"01-01-2000",
-      "id_number":"XXXX XXXX 1234"
+  "document_type": "Passport",
+  "verification_status": "Verified",
+  "trust_score": 0.96,
+  "validation": {
+    "name": true,
+    "dob": true,
+    "passport_number": true
   },
-  "explanation":"No suspicious inconsistencies detected."
+  "reasoning": "The extracted identity information is internally consistent. No suspicious inconsistencies were detected."
 }
 ```
 
 ---
 
-### OCR
+# API Documentation
+
+Once the FastAPI server is running:
+
+Swagger UI
 
 ```
-POST /ocr
+http://localhost:8000/docs
 ```
 
-Extracts all readable text from the uploaded document.
+ReDoc
+
+```
+http://localhost:8000/redoc
+```
 
 ---
 
-### Explain
+# Installation
 
-```
-POST /explain
-```
-
-Returns a natural language explanation of suspicious regions detected by the Vision-Language Model.
-
----
-
-### Health
-
-```
-GET /health
-```
-
-Checks API status.
-
----
-
-## Model Pipeline
-
-1. Upload document
-2. Image preprocessing
-3. OCR using EasyOCR
-4. Field extraction
-5. Validation rules
-6. Vision-Language reasoning
-7. LoRA fine-tuned verification
-8. Risk scoring
-9. API response
-
----
-
-## Evaluation Metrics
-
-The system is evaluated using:
-
-- Accuracy
-- Precision
-- Recall
-- F1-score
-
-The fine-tuned model is compared against the base Vision-Language Model to measure performance improvements.
-
----
-
-## Docker
-
-Build
+Clone the repository
 
 ```bash
-docker build -t hyperverify .
+git clone https://github.com/Mounika0021/TrustLens-AI.git
 ```
 
-Run
+Move into the project directory
 
 ```bash
-docker run -p 8000:8000 hyperverify
+cd TrustLens-AI
 ```
-
----
-
-## Run Locally
 
 Install dependencies
 
@@ -214,13 +227,23 @@ Install dependencies
 pip install -r requirements.txt
 ```
 
-Start API
+---
+
+# Running the Application
+
+Start the FastAPI server
 
 ```bash
-uvicorn app:app --reload
+uvicorn api.app:app --reload
 ```
 
-Open
+Server
+
+```
+http://localhost:8000
+```
+
+Swagger Documentation
 
 ```
 http://localhost:8000/docs
@@ -228,19 +251,77 @@ http://localhost:8000/docs
 
 ---
 
-## Future Improvements
+# Docker Deployment
 
-- Face matching between selfie and ID
-- QR code validation for Aadhaar
-- Digital signature verification
-- Multi-language OCR
-- Cloud deployment (AWS/GCP)
-- CI/CD pipeline using GitHub Actions
+Build Docker Image
+
+```bash
+docker build -t trustlens-ai .
+```
+
+Run Docker Container
+
+```bash
+docker run -p 8000:8000 trustlens-ai
+```
 
 ---
 
-## Author
+# Model Pipeline
+
+1. Upload identity document
+2. Image preprocessing
+3. OCR using EasyOCR
+4. MRZ extraction (Passport)
+5. Field extraction
+6. Identity validation
+7. Vision-Language reasoning using Qwen2-VL
+8. LoRA-enhanced inference
+9. Trust score computation
+10. Return explainable verification result
+
+---
+
+# Current Modules
+
+| Module | Description |
+|----------|-------------|
+| OCR | Extracts text from uploaded documents |
+| MRZ | Extracts passport MRZ information |
+| Validation | Performs identity consistency checks |
+| Inference | Runs Qwen2-VL model |
+| Reasoning | Generates explainable AI responses |
+| Trust Score | Computes document confidence score |
+| FastAPI | Serves REST API endpoints |
+
+---
+
+# Future Improvements
+
+- Selfie vs ID face matching
+- Aadhaar QR code verification
+- PAN card verification improvements
+- Digital signature verification
+- Multi-language OCR support
+- Batch document verification
+- Cloud deployment (AWS / Azure / GCP)
+- CI/CD using GitHub Actions
+- Kubernetes deployment
+
+---
+
+# Author
 
 **Ravakutam Mounika**
 
-Machine Learning | Computer Vision | Vision-Language Models
+Machine Learning Engineer | Computer Vision | Vision-Language Models | Generative AI
+
+GitHub
+
+https://github.com/Mounika0021
+
+---
+
+## License
+
+This project is intended for educational, research, and demonstration purposes.
