@@ -1,7 +1,11 @@
+
 """
 TrustLens AI
 Inference Engine
-Loads the Qwen2-VL LoRA model only once.
+
+Uses the fine-tuned Qwen2-VL + LoRA model
+with the same inference logic as the
+working TrustLens-AI Demo notebook.
 """
 
 import torch
@@ -17,7 +21,10 @@ from peft import PeftModel
 
 MODEL_NAME = "Qwen/Qwen2-VL-2B-Instruct"
 
-LORA_PATH = "/content/drive/MyDrive/TrustLens-AI/models/trustlens_qwen2vl_lora"
+LORA_PATH = (
+    "/content/drive/MyDrive/TrustLens-AI/"
+    "models/trustlens_qwen2vl_lora"
+)
 
 
 class TrustLensModel:
@@ -32,48 +39,47 @@ class TrustLensModel:
 
         print("Loading base model...")
 
-        base_model = Qwen2VLForConditionalGeneration.from_pretrained(
-            MODEL_NAME,
-            torch_dtype=torch.float16,
-            device_map="auto",
+        base_model = (
+            Qwen2VLForConditionalGeneration.from_pretrained(
+                MODEL_NAME,
+                torch_dtype=torch.float16,
+                device_map="auto",
+            )
         )
 
         print("Loading LoRA adapter...")
 
         self.model = PeftModel.from_pretrained(
             base_model,
-            LORA_PATH
+            LORA_PATH,
         )
 
         self.model.eval()
 
-        print("✅ TrustLens model ready!")
+        print("✅ TrustLens fine-tuned model ready!")
 
     def predict(self, image_path):
 
-        image = Image.open(image_path).convert("RGB")
+        image = Image.open(
+            image_path
+        ).convert("RGB")
 
-        prompt = """
-You are an identity document verification expert.
+        # IMPORTANT:
+        # This is the same prompt used by the
+        # working TrustLens-AI-Demo notebook.
 
-Look at this document.
+        prompt = (
+            "Analyze this identity document and "
+            "return the verification result in JSON format."
+        )
 
-Extract the MRZ.
-
-Return ONLY valid JSON.
-
-{
-    "mrz_line_1":"",
-    "mrz_line_2":""
-}
-"""
-
-        messages = [
+        conversation = [
             {
                 "role": "user",
                 "content": [
                     {
                         "type": "image",
+                        "image": image,
                     },
                     {
                         "type": "text",
@@ -84,7 +90,7 @@ Return ONLY valid JSON.
         ]
 
         text = self.processor.apply_chat_template(
-            messages,
+            conversation,
             tokenize=False,
             add_generation_prompt=True,
         )
@@ -93,21 +99,30 @@ Return ONLY valid JSON.
             text=[text],
             images=[image],
             return_tensors="pt",
-        ).to(self.model.device)
+        )
+
+        inputs = {
+            key: value.to(self.model.device)
+            for key, value in inputs.items()
+        }
 
         with torch.no_grad():
 
-            output = self.model.generate(
+            generated_ids = self.model.generate(
                 **inputs,
                 max_new_tokens=128,
+                do_sample=False,
             )
 
-        generated = output[:, inputs.input_ids.shape[1]:]
+        generated_ids = generated_ids[
+            :,
+            inputs["input_ids"].shape[1]:
+        ]
 
         response = self.processor.batch_decode(
-            generated,
+            generated_ids,
             skip_special_tokens=True,
-        )[0]
+        )[0].strip()
 
         return response
 
@@ -120,9 +135,6 @@ _model = None
 
 
 def get_model():
-    """
-    Load the model only once.
-    """
 
     global _model
 
@@ -133,9 +145,6 @@ def get_model():
 
 
 def predict(image_path):
-    """
-    Convenience function for inference.
-    """
 
     model = get_model()
 
@@ -144,8 +153,9 @@ def predict(image_path):
 
 if __name__ == "__main__":
 
-    result = predict(
-        "/content/drive/MyDrive/TrustLens-AI/datasets/MRZ/images/0.png"
+    test_image = (
+        "/content/drive/MyDrive/TrustLens-AI/"
+        "datasets/MRZ/images/0.png"
     )
 
-    print(result)
+    print(predict(test_image))
